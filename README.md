@@ -45,7 +45,7 @@ Una herramienta moderna desarrollada en **Google Apps Script** para el análisis
 
 <p align="center">
   <a href="https://youtu.be/NRzZ-OzU6qQ" target="_blank">
-    <img src="https://img.youtube.com/vi/NRzZ-OzU6qQ/0.jpg" alt="Video de presentación" width="85%">
+    <img src="https://img.youtube.com/vi/NRzZ-OzU6qQ/0.jpg" alt="Video de presentación">
   </a>
   <br>
   <em>🎬 Haz clic en la imagen para ver el video explicativo del proyecto</em>
