@@ -33,6 +33,10 @@ Una herramienta moderna desarrollada en **Google Apps Script** para el análisis
 - 🚪 **Autenticación segura**: Integra el flujo OAuth2 de forma nativa para autorizar los permisos de lectura de la API de GitHub sobre tus repositorios.
 - ℹ️ **Panel Acerca de**: Información del desarrollador, enlaces al código fuente original y soporte directo.
 
+<p align="center">
+  <img src="assets/infografía.png" alt="Infografía de características" width="100%">
+</p>
+
 ---
 
 ## Vista de la aplicación
