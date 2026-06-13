@@ -41,6 +41,16 @@ Una herramienta moderna desarrollada en **Google Apps Script** para el análisis
 
 ## Vista de la aplicación
 
+### Vídeo de presentación
+
+<p align="center">
+  <a href="https://youtu.be/NRzZ-OzU6qQ" target="_blank">
+    <img src="https://img.youtube.com/vi/NRzZ-OzU6qQ/maxresdefault.jpg" alt="Video de presentación" width="85%">
+  </a>
+  <br>
+  <em>🎬 Haz clic en la imagen para ver el video explicativo del proyecto</em>
+</p>
+
 ### Menú contextual en la hoja de cálculo
 El script añade de forma automática un menú para controlar todas las acciones y configuraciones organizadas en bloques.
 
