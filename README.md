@@ -34,7 +34,7 @@ Una herramienta moderna desarrollada en **Google Apps Script** para el análisis
 - ℹ️ **Panel Acerca de**: Información del desarrollador, enlaces al código fuente original y soporte directo.
 
 <p align="center">
-  <img src="assets/infografía.png" alt="Infografía de características" width="100%">
+  <img src="assets/infografía-v2.png" alt="Infografía de características" width="100%">
 </p>
 
 ---
