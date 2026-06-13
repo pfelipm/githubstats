@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Importar Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Importar tipografía Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { 
+        padding: 0; 
+        margin: 0; 
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #f8fafc;
+        overflow: hidden;
+      }
+      .container {
+        padding: 25px;
+        text-align: center;
+      }
+      .card {
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        background: white;
+        padding: 30px 20px;
+      }
+      .title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e1b4b;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+      .description {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 25px;
+      }
+      .status-active {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .actions-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      .btn-cancelar {
+        background-color: #94a3b8 !important;
+        border-radius: 20px;
+        text-transform: none;
+        font-weight: 500;
+      }
+      .btn-cerrar {
+        background-color: #ef4444 !important;
+        border-radius: 20px;
+        text-transform: none;
+        font-weight: 500;
+        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h5 class="title">Cerrar sesión de GitHub</h5>
+        
+        <!-- Estado de la sesión -->
+        <div id="status-container">
+          <span class="status-badge status-inactive">Comprobando estado...</span>
+        </div>
+
+        <p class="description">
+          ¿Estás seguro de que deseas cerrar la sesión actual de GitHub? Se borrarán los tokens de acceso temporal, pero mantendrás tu Client ID y Client Secret. El script volverá a solicitar el inicio de sesión automáticamente cuando requiera conectarse con la API.
+        </p>
+        
+        <div class="actions-row">
+          <button class="btn btn-cancelar waves-effect waves-light" onclick="google.script.host.close()">Cancelar</button>
+          <button id="btn-cerrar" class="btn btn-cerrar waves-effect waves-light" onclick="confirmarCierre()" disabled>Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Importar Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      let tieneAcceso = false;
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // Consultar estado de sesión en el servidor
+        google.script.run.withSuccessHandler(sesionActiva => {
+          const container = document.getElementById('status-container');
+          const btnCerrar = document.getElementById('btn-cerrar');
+          
+          if (sesionActiva) {
+            tieneAcceso = true;
+            container.innerHTML = '<span class="status-badge status-active">Sesión activa actualmente</span>';
+            btnCerrar.disabled = false;
+          } else {
+            container.innerHTML = '<span class="status-badge status-inactive">No hay ninguna sesión activa</span>';
+            btnCerrar.disabled = true;
+          }
+        }).comprobarSesionActiva();
+      });
+
+      function confirmarCierre() {
+        if (!tieneAcceso) return;
+        document.getElementById('btn-cerrar').disabled = true;
+        
+        google.script.run.withSuccessHandler(res => {
+          M.toast({html: res.mensaje, classes: res.estilo + ' rounded'});
+          setTimeout(() => {
+            google.script.host.close();
+          }, 1000);
+        }).cerrarSesionBackend();
+      }
+    </script>
+  </body>
+</html>

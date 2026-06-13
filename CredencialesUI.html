@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Importar Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Importar Iconos de Google -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Importar tipografía Outfit desde Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { 
+        padding: 0; 
+        margin: 0; 
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #f8fafc;
+      }
+      .container {
+        padding: 20px;
+        width: 100%;
+        max-width: 600px;
+      }
+      .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        background: white;
+        padding: 20px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1b4b;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e0e7ff;
+        padding-bottom: 10px;
+      }
+      .info-text {
+        font-size: 14px;
+        color: #475569;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+      .uri-box {
+        background: #f1f5f9;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 13px;
+        color: #334155;
+        word-break: break-all;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .uri-box i {
+        cursor: pointer;
+        color: #64748b;
+        transition: color 0.2s ease;
+      }
+      .uri-box i:hover {
+        color: #4f46e5;
+      }
+      .btn-guardar {
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-radius: 20px;
+        text-transform: none;
+        font-weight: 500;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h5 class="title">Configurar credenciales de GitHub</h5>
+        
+        <p class="info-text">
+          Registra una aplicación OAuth en la configuración de desarrollador de GitHub. Puedes consultar las <a href="https://github.com/pfelipm/githubstats#instalación-y-configuración" target="_blank">instrucciones detalladas de instalación</a> si necesitas ayuda. Pega las siguientes direcciones en los campos correspondientes de GitHub:
+        </p>
+
+        <label style="font-size: 0.8rem; color: #64748b; display: block; text-align: left;">Homepage URL</label>
+        <div class="uri-box">
+          <span id="script-uri">Cargando enlace...</span>
+          <i class="material-icons" onclick="copiarUri('script-uri')" title="Copiar al portapapeles">content_copy</i>
+        </div>
+
+        <label style="font-size: 0.8rem; color: #64748b; display: block; text-align: left;">Authorization callback URL</label>
+        <div class="uri-box">
+          <span id="redirect-uri">Cargando enlace...</span>
+          <i class="material-icons" onclick="copiarUri('redirect-uri')" title="Copiar al portapapeles">content_copy</i>
+        </div>
+
+        <form id="form-credenciales" onsubmit="guardarCredenciales(event)">
+          <div class="input-field col s12">
+            <input id="clientId" type="text" required>
+            <label for="clientId">Client ID</label>
+          </div>
+          <div class="input-field col s12">
+            <input id="clientSecret" type="password" required>
+            <label for="clientSecret">Client Secret</label>
+          </div>
+
+          <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="submit" class="btn btn-guardar waves-effect waves-light">Guardar credenciales</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Importar Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      let redirectUri = '';
+      let scriptUri = '';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        M.updateTextFields();
+        
+        // Cargar URI de redirección y credenciales previas si existen
+        google.script.run.withSuccessHandler(response => {
+          redirectUri = response.redirectUri;
+          scriptUri = response.scriptUri;
+          document.getElementById('redirect-uri').textContent = redirectUri;
+          document.getElementById('script-uri').textContent = scriptUri;
+          
+          if (response.clientId) {
+            document.getElementById('clientId').value = response.clientId;
+          }
+          if (response.clientSecret) {
+            document.getElementById('clientSecret').value = response.clientSecret;
+          }
+          M.updateTextFields();
+        }).obtenerAjustesCredenciales();
+      });
+
+      function copiarUri(idElemento) {
+        const urlText = document.getElementById(idElemento).textContent;
+        if (!urlText || urlText.indexOf('Cargando') !== -1) return;
+        navigator.clipboard.writeText(urlText).then(() => {
+          M.toast({html: 'Enlace copiado al portapapeles', classes: 'green rounded'});
+        });
+      }
+
+      function guardarCredenciales(e) {
+        e.preventDefault();
+        const clientId = document.getElementById('clientId').value.trim();
+        const clientSecret = document.getElementById('clientSecret').value.trim();
+
+        google.script.run.withSuccessHandler(res => {
+          M.toast({html: res.mensaje, classes: res.estilo + ' rounded'});
+          if (res.estilo === 'green') {
+            setTimeout(() => {
+              google.script.host.close();
+            }, 1000);
+          }
+        }).guardarCredencialesOAuth(clientId, clientSecret);
+      }
+    </script>
+  </body>
+</html>

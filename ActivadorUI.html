@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Importar Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Importar Iconos de Google -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Importar tipografía Outfit desde Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { 
+        padding: 0; 
+        margin: 0; 
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #f8fafc;
+      }
+      .container {
+        padding: 20px;
+        width: 100%;
+        max-width: 600px;
+      }
+      .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        background: white;
+        padding: 20px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1b4b;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e0e7ff;
+        padding-bottom: 10px;
+      }
+      .input-field label {
+        color: #64748b;
+      }
+      /* Estilo personalizado para el botón */
+      .btn-guardar {
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-radius: 20px;
+        text-transform: none;
+        font-weight: 500;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .btn-guardar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3) !important;
+      }
+      .btn-eliminar {
+        background-color: #ef4444 !important;
+        border-radius: 20px;
+        text-transform: none;
+        font-weight: 500;
+        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .btn-eliminar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.3) !important;
+      }
+      .checkbox-container {
+        margin: 15px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .checkbox-item {
+        margin-right: 15px;
+      }
+      /* Toast styling */
+      #toast-container {
+        top: auto !important;
+        bottom: 10%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h5 class="title">Configurar activador por tiempo</h5>
+        
+        <div class="card-panel orange lighten-5 orange-text text-darken-4" style="padding: 10px 15px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; border: 1px solid #ffe0b2; text-align: left; line-height: 1.5;">
+          <i class="material-icons left" style="font-size: 18px; margin-right: 5px;">warning</i>
+          <b>Importante:</b> La API de GitHub solo retiene datos de tráfico de los últimos 14 días. Configura el activador para ejecutarse periódicamente con una frecuencia menor a este periodo para evitar la pérdida de información histórica.
+        </div>
+
+        <form id="form-activador" onsubmit="guardarAjustes(event)">
+          <!-- Periodo -->
+          <div class="input-field col s12">
+            <select id="periodo" onchange="actualizarInterfaz()">
+              <option value="hora">Cada N horas</option>
+              <option value="dia">Cada N días</option>
+              <option value="semana">Días de la semana</option>
+            </select>
+            <label>Periodo de ejecución</label>
+          </div>
+
+          <!-- N horas / N días -->
+          <div id="container-cada-periodo" class="input-field col s12">
+            <input id="cadaPeriodo" type="number" min="1" max="24" value="1">
+            <label id="label-cada-periodo" for="cadaPeriodo">Repetir cada (intervalo)</label>
+          </div>
+
+          <!-- Selección de días de la semana -->
+          <div id="container-dias-semana" style="display: none; margin-bottom: 20px;">
+            <label style="font-size: 0.8rem; color: #64748b;">Selecciona los días de ejecución</label>
+            <div class="checkbox-container">
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Lunes" class="filled-in" />
+                <span>Lun</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Martes" class="filled-in" />
+                <span>Mar</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Miércoles" class="filled-in" />
+                <span>Mié</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Jueves" class="filled-in" />
+                <span>Jue</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Viernes" class="filled-in" />
+                <span>Vie</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Sábado" class="filled-in" />
+                <span>Sáb</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="dias" value="Domingo" class="filled-in" />
+                <span>Dom</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Hora de ejecución (para día y semana) -->
+          <div id="container-hora" class="input-field col s12" style="display: none;">
+            <select id="hora">
+              <!-- Opciones de 0 a 23 -->
+              <option value="0">00:00 - 01:00</option>
+              <option value="1">01:00 - 02:00</option>
+              <option value="2">02:00 - 03:00</option>
+              <option value="3">03:00 - 04:00</option>
+              <option value="4">04:00 - 05:00</option>
+              <option value="5">05:00 - 06:00</option>
+              <option value="6">06:00 - 07:00</option>
+              <option value="7">07:00 - 08:00</option>
+              <option value="8">08:00 - 09:00</option>
+              <option value="9">09:00 - 10:00</option>
+              <option value="10">10:00 - 11:00</option>
+              <option value="11">11:00 - 12:00</option>
+              <option value="12">12:00 - 13:00</option>
+              <option value="13">13:00 - 14:00</option>
+              <option value="14">14:00 - 15:00</option>
+              <option value="15">15:00 - 16:00</option>
+              <option value="16">16:00 - 17:00</option>
+              <option value="17">17:00 - 18:00</option>
+              <option value="18">18:00 - 19:00</option>
+              <option value="19">19:00 - 20:00</option>
+              <option value="20">20:00 - 21:00</option>
+              <option value="21">21:00 - 22:00</option>
+              <option value="22">22:00 - 23:00</option>
+              <option value="23">23:00 - 00:00</option>
+            </select>
+          </div>
+
+          <!-- Acciones -->
+          <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button id="btn-desactivar" type="button" class="btn btn-eliminar waves-effect waves-light" onclick="eliminarActivadorUI()" disabled>Desactivar</button>
+            <button id="btn-guardar" type="submit" class="btn btn-guardar waves-effect waves-light">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Importar Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      let cargando = false;
+
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar selects de Materialize
+        M.FormSelect.init(document.querySelectorAll('select'));
+        
+        setLoadingState(true);
+        // Cargar ajustes existentes
+        google.script.run.withSuccessHandler(ajustes => {
+          setLoadingState(false);
+          if (ajustes) {
+            document.getElementById('periodo').value = ajustes.periodo;
+            M.FormSelect.init(document.getElementById('periodo'));
+            
+            if (ajustes.periodo === 'semana') {
+              const dias = Array.isArray(ajustes.cadaPeriodo) ? ajustes.cadaPeriodo : [ajustes.cadaPeriodo];
+              dias.forEach(d => {
+                const cb = document.querySelector(`input[name="dias"][value="${d}"]`);
+                if (cb) cb.checked = true;
+              });
+            } else {
+              document.getElementById('cadaPeriodo').value = ajustes.cadaPeriodo;
+            }
+            
+            document.getElementById('hora').value = ajustes.hora;
+            M.FormSelect.init(document.getElementById('hora'));
+            
+            actualizarInterfaz();
+            // Activamos el botón de eliminar puesto que hay un activador activo
+            document.getElementById('btn-desactivar').disabled = false;
+          } else {
+            // Si no hay activador activo, se deshabilita el botón desactivar
+            document.getElementById('btn-desactivar').disabled = true;
+          }
+        }).withFailureHandler(() => {
+          setLoadingState(false);
+        }).obtenerAjustesActivador();
+      });
+
+      function setLoadingState(loading) {
+        cargando = loading;
+        const btnGuardar = document.getElementById('btn-guardar');
+        const btnDesactivar = document.getElementById('btn-desactivar');
+        if (loading) {
+          btnGuardar.disabled = true;
+          btnDesactivar.disabled = true;
+        } else {
+          btnGuardar.disabled = false;
+          // btn-desactivar se evalúa por separado
+        }
+      }
+
+      function actualizarInterfaz() {
+        const periodo = document.getElementById('periodo').value;
+        const containerCadaPeriodo = document.getElementById('container-cada-periodo');
+        const containerDiasSemana = document.getElementById('container-dias-semana');
+        const containerHora = document.getElementById('container-hora');
+        const labelCadaPeriodo = document.getElementById('label-cada-periodo');
+        const inputCadaPeriodo = document.getElementById('cadaPeriodo');
+
+        if (periodo === 'hora') {
+          containerCadaPeriodo.style.display = 'block';
+          containerDiasSemana.style.display = 'none';
+          containerHora.style.display = 'none';
+          labelCadaPeriodo.textContent = 'Cada cuantas horas';
+          inputCadaPeriodo.min = 1;
+          inputCadaPeriodo.max = 24;
+        } else if (periodo === 'dia') {
+          containerCadaPeriodo.style.display = 'block';
+          containerDiasSemana.style.display = 'none';
+          containerHora.style.display = 'block';
+          labelCadaPeriodo.textContent = 'Cada cuántos días';
+          inputCadaPeriodo.min = 1;
+          inputCadaPeriodo.max = 30;
+        } else if (periodo === 'semana') {
+          containerCadaPeriodo.style.display = 'none';
+          containerDiasSemana.style.display = 'block';
+          containerHora.style.display = 'block';
+        }
+        
+        M.updateTextFields();
+        M.FormSelect.init(document.querySelectorAll('select'));
+      }
+
+      function guardarAjustes(e) {
+        e.preventDefault();
+        if (cargando) return;
+        const periodo = document.getElementById('periodo').value;
+        let cadaPeriodo;
+        const hora = document.getElementById('hora').value;
+
+        if (periodo === 'semana') {
+          const checkboxes = document.querySelectorAll('input[name="dias"]:checked');
+          cadaPeriodo = Array.from(checkboxes).map(cb => cb.value);
+          if (cadaPeriodo.length === 0) {
+            M.toast({html: 'Selecciona al menos un día.', classes: 'red rounded'});
+            return;
+          }
+        } else {
+          cadaPeriodo = Number(document.getElementById('cadaPeriodo').value);
+          if (!cadaPeriodo || cadaPeriodo < 1) {
+            M.toast({html: 'Introduce un número válido.', classes: 'red rounded'});
+            return;
+          }
+        }
+
+        const ajustes = {
+          periodo: periodo,
+          cadaPeriodo: cadaPeriodo,
+          hora: hora
+        };
+
+        setLoadingState(true);
+        google.script.run.withSuccessHandler(res => {
+          setLoadingState(false);
+          M.toast({html: res.mensaje, classes: res.estilo + ' rounded'});
+          if (res.estilo.indexOf('red') === -1) {
+            setTimeout(() => {
+              google.script.host.close();
+            }, 1000);
+          }
+        }).withFailureHandler(err => {
+          setLoadingState(false);
+          M.toast({html: 'Error: ' + err.message, classes: 'red rounded'});
+        }).crearActivador2(ajustes);
+      }
+
+      function eliminarActivadorUI() {
+        if (cargando) return;
+        setLoadingState(true);
+        google.script.run.withSuccessHandler(res => {
+          setLoadingState(false);
+          M.toast({html: res.mensaje, classes: res.estilo + ' rounded'});
+          setTimeout(() => {
+            google.script.host.close();
+          }, 1000);
+        }).withFailureHandler(err => {
+          setLoadingState(false);
+          M.toast({html: 'Error: ' + err.message, classes: 'red rounded'});
+        }).eliminarActivador(true);
+      }
+    </script>
+  </body>
+</html>
+

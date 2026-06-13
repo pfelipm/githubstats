@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Iconos de Google -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Tipografía Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js de CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        padding: 20px;
+        margin: 0;
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
+      }
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 16px;
+      }
+      .dashboard-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+      }
+      .filters-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      .filter-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .filter-item {
+        flex: 1;
+        min-width: 200px;
+      }
+      .stats-grid {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+      .stat-card {
+        flex: 1;
+        min-width: 200px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #4f46e5;
+        margin-top: 8px;
+      }
+      .stat-label {
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 500;
+      }
+      .chart-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+      .btn-refresh {
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-radius: 20px;
+        text-transform: none;
+        font-weight: 500;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-header">
+      <h4 class="dashboard-title">Estadísticas de tráfico de GitHub</h4>
+      <button class="btn btn-refresh waves-effect waves-light" onclick="cargarDatosYFiltros()">
+        <i class="material-icons left">refresh</i>Actualizar datos
+      </button>
+    </div>
+
+    <!-- Filtros de Control -->
+    <div class="filters-card">
+      <div class="filter-row">
+        <!-- Selector de Repositorio -->
+        <div class="filter-item input-field">
+          <select id="repo-filter" onchange="aplicarFiltros()">
+            <option value="todos">Todos los repositorios</option>
+          </select>
+          <label>Repositorio</label>
+        </div>
+        <!-- Selector de Rango de Fechas -->
+        <div class="filter-item input-field">
+          <select id="date-filter" onchange="aplicarFiltros()">
+            <option value="15">Últimos 15 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+            <option value="180">Últimos 180 días</option>
+            <option value="360">Últimos 360 días</option>
+            <option value="todos">Histórico completo</option>
+          </select>
+          <label>Rango de tiempo</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicadores Clave -->
+    <div id="stats-container" class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total de visualizaciones</span>
+        <span id="stat-total-views" class="stat-value">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Visitantes únicos</span>
+        <span id="stat-unique-visitors" class="stat-value">0</span>
+      </div>
+    </div>
+
+    <!-- Contenedor del Gráfico -->
+    <div class="chart-card">
+      <div id="loader" class="loader-container">
+        <div class="preloader-wrapper big active">
+          <div class="spinner-layer spinner-blue-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="chart-wrapper" style="display: none; position: relative; height:40vh; width:100%">
+        <canvas id="trafficChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Importar Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      let rawData = [];
+      let myChart = null;
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar selects de Materialize
+        M.FormSelect.init(document.querySelectorAll('select'));
+        cargarDatosYFiltros();
+      });
+
+      function cargarDatosYFiltros() {
+        document.getElementById('loader').style.display = 'flex';
+        document.getElementById('chart-wrapper').style.display = 'none';
+        
+        google.script.run.withSuccessHandler(response => {
+          rawData = response.trafico;
+          
+          // Rellenar selector de repositorios
+          const repoFilter = document.getElementById('repo-filter');
+          // Limpiar opciones anteriores manteniendo "todos"
+          repoFilter.innerHTML = '<option value="todos">Todos los repositorios</option>';
+          
+          response.repos.forEach(repo => {
+            const opt = document.createElement('option');
+            opt.value = repo;
+            opt.textContent = repo;
+            repoFilter.appendChild(opt);
+          });
+          
+          M.FormSelect.init(repoFilter);
+          aplicarFiltros();
+        }).obtenerDatosDashboard();
+      }
+
+      function aplicarFiltros() {
+        const repoSeleccionado = document.getElementById('repo-filter').value;
+        const diasFiltro = document.getElementById('date-filter').value;
+        
+        // Calcular fecha límite
+        let fechaLimite = null;
+        if (diasFiltro !== 'todos') {
+          const limite = new Date();
+          limite.setDate(limite.getDate() - parseInt(diasFiltro));
+          fechaLimite = limite.toISOString().substring(0, 10);
+        }
+        
+        // Filtrar datos
+        let datosFiltrados = rawData;
+        if (repoSeleccionado !== 'todos') {
+          datosFiltrados = datosFiltrados.filter(row => row.repo === repoSeleccionado);
+        }
+        if (fechaLimite) {
+          datosFiltrados = datosFiltrados.filter(row => row.fecha >= fechaLimite);
+        }
+        
+        // Agrupar por fecha
+        const agrupado = {};
+        let totalViews = 0;
+        let totalUniques = 0;
+        
+        datosFiltrados.forEach(row => {
+          if (!agrupado[row.fecha]) {
+            agrupado[row.fecha] = { views: 0, uniques: 0 };
+          }
+          agrupado[row.fecha].views += row.views;
+          agrupado[row.fecha].uniques += row.uniques;
+          totalViews += row.views;
+          totalUniques += row.uniques;
+        });
+        
+        // Actualizar KPIs
+        document.getElementById('stat-total-views').textContent = totalViews.toLocaleString();
+        document.getElementById('stat-unique-visitors').textContent = totalUniques.toLocaleString();
+        
+        // Preparar vectores ordenados por fecha
+        const fechasOrdenadas = Object.keys(agrupado).sort();
+        const viewsArray = fechasOrdenadas.map(f => agrupado[f].views);
+        const uniquesArray = fechasOrdenadas.map(f => agrupado[f].uniques);
+        
+        dibujarGrafico(fechasOrdenadas, viewsArray, uniquesArray);
+      }
+
+      function dibujarGrafico(labels, viewsData, uniquesData) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('chart-wrapper').style.display = 'block';
+        
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        
+        if (myChart) {
+          myChart.destroy();
+        }
+        
+        myChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Visualizaciones',
+                data: viewsData,
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.3,
+                fill: true,
+                borderWidth: 3
+              },
+              {
+                label: 'Visitantes únicos',
+                data: uniquesData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.3,
+                fill: true,
+                borderWidth: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  font: {
+                    family: 'Outfit',
+                    size: 13
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: '#f1f5f9'
+                },
+                ticks: {
+                  font: {
+                    family: 'Outfit'
+                  }
+                }
+              },
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  font: {
+                    family: 'Outfit'
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
