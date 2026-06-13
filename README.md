@@ -108,18 +108,16 @@ Modal de créditos interactivo e integrado.
 ## Instalación y configuración
 
 1. Realiza una copia de la **[plantilla de hoja de cálculo oficial](https://docs.google.com/spreadsheets/d/1NDaPRMx-o4ZBf2wtRjI3zwJwbdCySUpW-c2O6b-q18w/edit?usp=sharing)**.
-2. Abre el editor de secuencias de comandos desde el menú **Extensiones > Apps Script**.
-3. Recarga la hoja de cálculo para que aparezca el menú contextual **GitHub Stats**.
-4. Ve a **GitHub Stats > 🔑 Configurar credenciales**.
-5. Desde ese diálogo podrás ver directamente tu **Homepage URL** y tu **Authorization callback URL** (con opción de copiarlas rápidamente al portapapeles).
-6. **Obtención y configuración de credenciales OAuth de GitHub**:
+2. Ve a **GitHub Stats > 🔑 Configurar credenciales**.
+3. Desde ese diálogo podrás ver directamente tu **Homepage URL** y tu **Authorization callback URL** (con opción de copiarlas rápidamente al portapapeles).
+4. **Obtención y configuración de credenciales OAuth de GitHub**:
    Para permitir que el script se comunique de forma segura con la API de GitHub, necesitas registrar una aplicación OAuth propia:
    - Inicia sesión en GitHub y ve a **Settings (Configuración) > Developer Settings > OAuth Apps**.
    - Haz clic en **New OAuth App** (Nuevo registro de aplicación OAuth).
    - Rellena los datos básicos:
      - **Application name**: `GitHub Stats (o el nombre que prefieras)`.
-     - **Homepage URL**: Pega la dirección de Homepage URL copiada en el paso 5.
-     - **Authorization callback URL**: Pega la dirección de Authorization callback URL copiada en el paso 5.
+     - **Homepage URL**: Pega la dirección de Homepage URL copiada en el paso 3.
+     - **Authorization callback URL**: Pega la dirección de Authorization callback URL copiada en el paso 3.
 
    <p align="center">
      <img src="assets/client-id-secrets-github.png" alt="Registro OAuth en GitHub" width="100%">
@@ -129,7 +127,7 @@ Modal de créditos interactivo e integrado.
    - Copia el **Client ID** generado y pégalo en la ventana de configuración de la hoja de cálculo.
    - Haz clic en **Generate a new client secret**, copia el código generado y pégalo en el segundo campo de la ventana de configuración.
    - Haz clic en **Guardar credenciales** para salvar los datos de forma segura en las propiedades internas del script (evitando que queden expuestas en el código fuente).
-7. Haz clic en cualquier comando de carga o configuración para iniciar el proceso de autorización OAuth y concede acceso a tus repositorios a través del nuevo diálogo HTML diseñado para ello.
+5. Haz clic en cualquier comando de carga o configuración para iniciar el proceso de autorización OAuth y concede acceso a tus repositorios a través del nuevo diálogo HTML diseñado para ello.
 
 ---
 
