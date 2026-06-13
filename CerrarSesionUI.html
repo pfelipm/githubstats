@@ -88,7 +88,7 @@
         </p>
         
         <div class="actions-row">
-          <button class="btn btn-cancelar waves-effect waves-light" onclick="google.script.host.close()">Cancelar</button>
+          <button id="btn-cancelar" class="btn btn-cancelar waves-effect waves-light" onclick="google.script.host.close()">Cancelar</button>
           <button id="btn-cerrar" class="btn btn-cerrar waves-effect waves-light" onclick="confirmarCierre()" disabled>Cerrar sesión</button>
         </div>
       </div>
@@ -118,13 +118,20 @@
 
       function confirmarCierre() {
         if (!tieneAcceso) return;
-        document.getElementById('btn-cerrar').disabled = true;
+        const btnCerrar = document.getElementById('btn-cerrar');
+        const btnCancelar = document.getElementById('btn-cancelar');
+        btnCerrar.disabled = true;
+        btnCancelar.disabled = true;
         
         google.script.run.withSuccessHandler(res => {
           M.toast({html: res.mensaje, classes: res.estilo + ' rounded'});
           setTimeout(() => {
             google.script.host.close();
           }, 1000);
+        }).withFailureHandler(err => {
+          M.toast({html: 'Error al conectar con el servidor', classes: 'red rounded'});
+          btnCerrar.disabled = false;
+          btnCancelar.disabled = false;
         }).cerrarSesionBackend();
       }
     </script>

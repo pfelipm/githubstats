@@ -104,7 +104,8 @@
           </div>
 
           <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: flex-end;">
-            <button type="submit" class="btn btn-guardar waves-effect waves-light">Guardar credenciales</button>
+            <button type="button" id="btn-cancelar" class="btn btn-cancelar waves-effect waves-light" onclick="google.script.host.close()">Cancelar</button>
+            <button type="submit" id="btn-guardar" class="btn btn-guardar waves-effect waves-light">Guardar credenciales</button>
           </div>
         </form>
       </div>
@@ -149,13 +150,27 @@
         const clientId = document.getElementById('clientId').value.trim();
         const clientSecret = document.getElementById('clientSecret').value.trim();
 
+        // Inhabilitar botones durante la petición
+        const btnGuardar = document.getElementById('btn-guardar');
+        const btnCancelar = document.getElementById('btn-cancelar');
+        btnGuardar.disabled = true;
+        btnCancelar.disabled = true;
+
         google.script.run.withSuccessHandler(res => {
           M.toast({html: res.mensaje, classes: res.estilo + ' rounded'});
           if (res.estilo === 'green') {
             setTimeout(() => {
               google.script.host.close();
             }, 1000);
+          } else {
+            // Habilitar de nuevo si hay un error
+            btnGuardar.disabled = false;
+            btnCancelar.disabled = false;
           }
+        }).withFailureHandler(err => {
+          M.toast({html: 'Error al conectar con el servidor', classes: 'red rounded'});
+          btnGuardar.disabled = false;
+          btnCancelar.disabled = false;
         }).guardarCredencialesOAuth(clientId, clientSecret);
       }
     </script>
