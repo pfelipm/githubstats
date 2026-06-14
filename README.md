@@ -158,7 +158,7 @@ Una vez instalado y autenticado, podrás utilizar las herramientas del menú con
 
 Desarrollado y mantenido por **Pablo Felip Monferrer** (pfelipm).
 
-- Sitio web: [pablofelip.online/sobre-mi/](https://pablofelip.online/sobre-mi)
+- Sitio web: [pablofelip.online/sobre-mi](https://pablofelip.online/sobre-mi)
 - GitHub: [pfelipm](https://github.com/pfelipm)
 - LinkedIn: [in/pfelipm](https://www.linkedin.com/in/pfelipm/)
 - X: [@pfelipm](https://x.com/pfelipm)
