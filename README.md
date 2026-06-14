@@ -11,7 +11,7 @@
 
 Una herramienta moderna desarrollada en **Google Apps Script** para el análisis y la visualización de estadísticas y tráfico de tus repositorios de GitHub integrada directamente en tu hoja de cálculo, eliminando la dependencia de herramientas externas como Looker (Data) Studio.
 
-> [!IMPORTANT]
+> [!IMPORTANT] Importante
 > **Retención crítica de datos**: La API oficial de GitHub solo almacena y devuelve datos de tráfico correspondientes a los **últimos 14 días**. Si no realizas una copia histórica con una frecuencia menor a este periodo, esa información se perderá de manera permanente. Este script automatiza dicha recolección de datos históricos a través de un activador temporal programable.
 
 
