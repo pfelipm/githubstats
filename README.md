@@ -69,7 +69,7 @@ Permite analizar de forma agregada o múltiple el volumen de visualizaciones y v
 Diálogo interactivo para programar la recolección automática y periódica del tráfico (por horas, por días o seleccionando días de la semana y horas específicas) para evitar la pérdida del histórico de 14 días.
 
 <p align="center">
-  <img src="assets/dialogo-activador.png" alt="Planificación del activador" width="55%">
+  <img src="assets/dialogo-activador.png" alt="Planificación del activador" width="75%">
 </p>
 
 ### Hoja de datos de repositorios
