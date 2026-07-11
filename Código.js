@@ -1,3 +1,5 @@
+const VERSION = '2.1';
+
 // add custom menu
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
@@ -21,9 +23,9 @@ function onOpen() {
 function abrirDashboard() {
   const html = HtmlService.createHtmlOutputFromFile('Dashboard')
       .setWidth(1000)
-      .setHeight(850)
-      .setTitle('Estadísticas de tráfico');
-  SpreadsheetApp.getUi().showModalDialog(html, 'Estadísticas de tráfico');
+      .setHeight(900)
+      .setTitle('GitHub Stats');
+  SpreadsheetApp.getUi().showModalDialog(html, 'GitHub Stats');
 }
 
 /**
@@ -33,19 +35,20 @@ function abrirActivadorUI() {
   const html = HtmlService.createHtmlOutputFromFile('ActivadorUI')
       .setWidth(550)
       .setHeight(580)
-      .setTitle('Configurar activador');
-  SpreadsheetApp.getUi().showModalDialog(html, 'Configurar activador');
+      .setTitle('GitHub Stats');
+  SpreadsheetApp.getUi().showModalDialog(html, 'GitHub Stats');
 }
 
 /**
  * Abre el diálogo de atribución/acerca de.
  */
 function abrirAcercaDe() {
-  const html = HtmlService.createHtmlOutputFromFile('acercaDe')
+  const template = HtmlService.createTemplateFromFile('acercaDe');
+  const html = template.evaluate()
       .setWidth(450)
       .setHeight(480)
-      .setTitle('Acerca de GitHub Stats');
-  SpreadsheetApp.getUi().showModalDialog(html, 'Acerca de GitHub Stats');
+      .setTitle('Acerca de...');
+  SpreadsheetApp.getUi().showModalDialog(html, 'Acerca de...');
 }
 
 /**
@@ -55,8 +58,8 @@ function abrirCredencialesUI() {
   const html = HtmlService.createHtmlOutputFromFile('CredencialesUI')
       .setWidth(550)
       .setHeight(650)
-      .setTitle('Configurar credenciales');
-  SpreadsheetApp.getUi().showModalDialog(html, 'Configurar credenciales');
+      .setTitle('GitHub Stats');
+  SpreadsheetApp.getUi().showModalDialog(html, 'GitHub Stats');
 }
 
 /**
@@ -77,8 +80,8 @@ function abrirCerrarSesionUI() {
   const html = HtmlService.createHtmlOutputFromFile('CerrarSesionUI')
       .setWidth(450)
       .setHeight(370)
-      .setTitle('Cerrar sesión de GitHub');
-  SpreadsheetApp.getUi().showModalDialog(html, 'Cerrar sesión de GitHub');
+      .setTitle('GitHub Stats');
+  SpreadsheetApp.getUi().showModalDialog(html, 'GitHub Stats');
 }
 
 /**

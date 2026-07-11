@@ -17,6 +17,7 @@
         font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f8fafc;
         color: #1e293b;
+        overflow-y: auto;
       }
       .dashboard-header {
         display: flex;
@@ -95,6 +96,61 @@
         font-weight: 500;
         box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
       }
+      .custom-select-trigger {
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      .custom-select-trigger:hover {
+        border-color: #cbd5e1 !important;
+      }
+      #repo-search-input {
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      #repo-search-input:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 1px 0 0 #4f46e5 !important;
+      }
+      .repo-option-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+      }
+      .repo-option-row:hover {
+        background-color: #f1f5f9;
+      }
+      .repo-option-row:hover .btn-only-this {
+        display: inline-block !important;
+      }
+      /* Estilo para los checkboxes de materialize dentro de nuestro dropdown personalizado */
+      .repo-option-row [type="checkbox"].filled-in:checked+span:not(.lever):after {
+        border: 2px solid #4f46e5 !important;
+        background-color: #4f46e5 !important;
+      }
+      .repo-option-row [type="checkbox"].filled-in:not(:checked)+span:not(.lever):after {
+        border: 2px solid #cbd5e1 !important;
+      }
+      /* Custom scrollbar para la lista de repos */
+      #repo-list-options::-webkit-scrollbar {
+        width: 6px;
+      }
+      #repo-list-options::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #repo-list-options::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 3px;
+      }
+      #repo-list-options::-webkit-scrollbar-thumb:hover {
+        background-color: #94a3b8;
+      }
+      .btn-flat:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+      }
     </style>
   </head>
   <body>
@@ -107,16 +163,38 @@
 
     <!-- Filtros de Control -->
     <div class="filters-card">
-      <div class="filter-row">
-        <!-- Selector de Repositorio -->
-        <div class="filter-item input-field">
-          <select id="repo-filter" onchange="aplicarFiltros()">
-            <option value="todos">Todos los repositorios</option>
-          </select>
-          <label>Repositorio</label>
+      <div class="filter-row" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end;">
+        <!-- Selector de Repositorio (Multiselección Personalizada) -->
+        <div class="filter-item" style="position: relative; flex: 1; min-width: 200px;">
+          <label style="font-size: 0.8rem; color: #9e9e9e; display: block; margin-bottom: 4px;">Repositorio</label>
+          <div id="repo-select-trigger" class="custom-select-trigger" style="border-bottom: 1px solid #9e9e9e; height: 3rem; line-height: 3rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; position: relative;">
+            <span id="repo-select-label" style="font-size: 16px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 24px;">Seleccionar repositorios...</span>
+            <i class="material-icons" style="position: absolute; right: 0; color: #9e9e9e; pointer-events: none;">arrow_drop_down</i>
+          </div>
+          
+          <div id="repo-select-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; padding: 12px; flex-direction: column; box-sizing: border-box; max-height: 400px; width: 100%;">
+            <!-- Buscador -->
+            <div style="position: relative; margin-bottom: 8px;">
+              <i class="material-icons" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #94a3b8; pointer-events: none;">search</i>
+              <input type="text" id="repo-search-input" placeholder="Filtrar repositorios..." style="width: 100%; padding: 4px 28px 4px 32px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; margin: 0; box-sizing: border-box; height: 32px; font-family: inherit;">
+              <i class="material-icons" id="repo-search-clear" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #94a3b8; cursor: pointer; display: none; user-select: none;">close</i>
+            </div>
+            
+            <!-- Botones de Acción rápidos -->
+            <div style="display: flex; gap: 6px; margin-bottom: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; flex-wrap: wrap;">
+              <button type="button" id="btn-select-all" class="btn-flat" style="padding: 0 8px; height: 24px; line-height: 24px; font-size: 11px; text-transform: none; border-radius: 4px; background-color: #f1f5f9; color: #475569; border: none; cursor: pointer; font-weight: 500;">Todos</button>
+              <button type="button" id="btn-select-none" class="btn-flat" style="padding: 0 8px; height: 24px; line-height: 24px; font-size: 11px; text-transform: none; border-radius: 4px; background-color: #f1f5f9; color: #475569; border: none; cursor: pointer; font-weight: 500;">Ninguno</button>
+              <button type="button" id="btn-select-invert" class="btn-flat" style="padding: 0 8px; height: 24px; line-height: 24px; font-size: 11px; text-transform: none; border-radius: 4px; background-color: #f1f5f9; color: #475569; border: none; cursor: pointer; font-weight: 500;">Invertir</button>
+            </div>
+            
+            <!-- Lista de Repositorios -->
+            <div id="repo-list-options" style="overflow-y: auto; max-height: 220px; display: flex; flex-direction: column; gap: 4px; padding-right: 4px;">
+              <!-- Los elementos se generarán dinámicamente -->
+            </div>
+          </div>
         </div>
         <!-- Selector de Rango de Fechas -->
-        <div class="filter-item input-field">
+        <div class="filter-item input-field" style="margin: 0;">
           <select id="date-filter" onchange="aplicarFiltros()">
             <option value="15">Últimos 15 días</option>
             <option value="30" selected>Últimos 30 días</option>
@@ -124,8 +202,21 @@
             <option value="180">Últimos 180 días</option>
             <option value="360">Últimos 360 días</option>
             <option value="todos">Histórico completo</option>
+            <option value="custom">Personalizado</option>
           </select>
           <label>Rango de tiempo</label>
+        </div>
+      </div>
+      
+      <!-- Rango de fechas personalizado -->
+      <div id="custom-date-container" style="display: none; gap: 20px; flex-wrap: wrap; margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+        <div class="filter-item input-field" style="margin: 0; min-width: 200px; flex: 1;">
+          <input type="date" id="start-date-input" onchange="aplicarFiltros()" style="margin: 0; height: 3rem; border-bottom: 1px solid #9e9e9e;">
+          <label for="start-date-input" class="active" style="transform: translateY(-14px) scale(0.8); transform-origin: 0 0;">Fecha de inicio</label>
+        </div>
+        <div class="filter-item input-field" style="margin: 0; min-width: 200px; flex: 1;">
+          <input type="date" id="end-date-input" onchange="aplicarFiltros()" style="margin: 0; height: 3rem; border-bottom: 1px solid #9e9e9e;">
+          <label for="end-date-input" class="active" style="transform: translateY(-14px) scale(0.8); transform-origin: 0 0;">Fecha de fin</label>
         </div>
       </div>
     </div>
@@ -144,6 +235,21 @@
 
     <!-- Contenedor del Gráfico -->
     <div class="chart-card">
+      <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div class="chart-tabs" style="display: flex; gap: 8px;">
+          <button id="btn-tab-evolution" class="tab-btn active-tab" onclick="cambiarTab('evolution')" style="background: none; border: none; padding: 6px 12px; font-size: 14px; font-weight: 500; color: #4f46e5; border-bottom: 2px solid #4f46e5; cursor: pointer; font-family: inherit; transition: all 0.15s ease;">Evolución temporal</button>
+          <button id="btn-tab-ranking" class="tab-btn" onclick="cambiarTab('ranking')" style="background: none; border: none; padding: 6px 12px; font-size: 14px; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer; font-family: inherit; transition: all 0.15s ease;">Ranking de popularidad</button>
+        </div>
+        
+        <div id="ranking-controls" style="display: none; align-items: center; gap: 8px;">
+          <span style="font-size: 13px; color: #64748b; font-weight: 500;">Repositorios a mostrar:</span>
+          <select id="top-n-select" class="browser-default" onchange="aplicarFiltros()" style="width: auto; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; font-family: inherit; padding: 0 4px; display: inline-block;">
+            <option value="5">Top 5</option>
+            <option value="10" selected>Top 10</option>
+            <option value="15">Top 15</option>
+          </select>
+        </div>
+      </div>
       <div id="loader" class="loader-container">
         <div class="preloader-wrapper big active">
           <div class="spinner-layer spinner-blue-only">
@@ -157,7 +263,7 @@
           </div>
         </div>
       </div>
-      <div id="chart-wrapper" style="display: none; position: relative; height:40vh; width:100%">
+      <div id="chart-wrapper" style="display: none; position: relative; height:45vh; width:100%">
         <canvas id="trafficChart"></canvas>
       </div>
     </div>
@@ -166,89 +272,434 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
       let rawData = [];
+      let reposDisponibles = [];
+      let vistasPorRepo = {};
+      let selectedRepos = new Set();
       let myChart = null;
+      let activeTab = 'evolution'; // 'evolution' o 'ranking'
 
       document.addEventListener('DOMContentLoaded', () => {
         // Inicializar selects de Materialize
         M.FormSelect.init(document.querySelectorAll('select'));
+        
+        // Configurar comportamiento del dropdown personalizado
+        const trigger = document.getElementById('repo-select-trigger');
+        const dropdown = document.getElementById('repo-select-dropdown');
+        const searchInput = document.getElementById('repo-search-input');
+        
+        const repositionDropdown = () => {
+          if (dropdown.style.display === 'flex') {
+            const rect = trigger.getBoundingClientRect();
+            dropdown.style.position = 'fixed';
+            dropdown.style.top = `${rect.bottom}px`;
+            dropdown.style.left = `${rect.left}px`;
+            dropdown.style.width = `${rect.width}px`;
+          }
+        };
+
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isVisible = dropdown.style.display === 'flex';
+          if (isVisible) {
+            dropdown.style.display = 'none';
+            trigger.style.borderBottom = '1px solid #9e9e9e';
+          } else {
+            dropdown.style.display = 'flex';
+            repositionDropdown();
+            trigger.style.borderBottom = '2px solid #4f46e5';
+            searchInput.focus();
+          }
+        });
+        
+        dropdown.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+        
+        document.addEventListener('click', () => {
+          dropdown.style.display = 'none';
+          trigger.style.borderBottom = '1px solid #9e9e9e';
+        });
+
+        window.addEventListener('resize', repositionDropdown);
+        window.addEventListener('scroll', repositionDropdown, true);
+        
+        const clearBtn = document.getElementById('repo-search-clear');
+        
+        searchInput.addEventListener('input', (e) => {
+          const val = e.target.value;
+          clearBtn.style.display = val ? 'block' : 'none';
+          renderizarListaRepositorios(val);
+        });
+        
+        clearBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          searchInput.value = '';
+          clearBtn.style.display = 'none';
+          renderizarListaRepositorios('');
+          searchInput.focus();
+        });
+        
+        document.getElementById('btn-select-all').addEventListener('click', () => {
+          selectedRepos = new Set(reposDisponibles);
+          renderizarListaRepositorios(searchInput.value);
+          actualizarTriggerLabel();
+          aplicarFiltros();
+        });
+        
+        document.getElementById('btn-select-none').addEventListener('click', () => {
+          selectedRepos.clear();
+          renderizarListaRepositorios(searchInput.value);
+          actualizarTriggerLabel();
+          aplicarFiltros();
+        });
+        
+        document.getElementById('btn-select-invert').addEventListener('click', () => {
+          const newSelection = new Set();
+          reposDisponibles.forEach(repo => {
+            if (!selectedRepos.has(repo)) {
+              newSelection.add(repo);
+            }
+          });
+          selectedRepos = newSelection;
+          renderizarListaRepositorios(searchInput.value);
+          actualizarTriggerLabel();
+          aplicarFiltros();
+        });
+        
         cargarDatosYFiltros();
       });
+
+      function cambiarTab(tab) {
+        activeTab = tab;
+        
+        const btnEvolution = document.getElementById('btn-tab-evolution');
+        const btnRanking = document.getElementById('btn-tab-ranking');
+        const rankingControls = document.getElementById('ranking-controls');
+        
+        if (tab === 'evolution') {
+          btnEvolution.style.color = '#4f46e5';
+          btnEvolution.style.borderBottom = '2px solid #4f46e5';
+          btnRanking.style.color = '#64748b';
+          btnRanking.style.borderBottom = '2px solid transparent';
+          rankingControls.style.display = 'none';
+        } else {
+          btnRanking.style.color = '#4f46e5';
+          btnRanking.style.borderBottom = '2px solid #4f46e5';
+          btnEvolution.style.color = '#64748b';
+          btnEvolution.style.borderBottom = '2px solid transparent';
+          rankingControls.style.display = 'flex';
+        }
+        
+        aplicarFiltros();
+      }
 
       function cargarDatosYFiltros() {
         document.getElementById('loader').style.display = 'flex';
         document.getElementById('chart-wrapper').style.display = 'none';
         
+        const searchInput = document.getElementById('repo-search-input');
+        if (searchInput) {
+          searchInput.value = '';
+        }
+        const clearBtn = document.getElementById('repo-search-clear');
+        if (clearBtn) {
+          clearBtn.style.display = 'none';
+        }
+        
         google.script.run.withSuccessHandler(response => {
           rawData = response.trafico;
+          reposDisponibles = response.repos;
           
-          // Rellenar selector de repositorios
-          const repoFilter = document.getElementById('repo-filter');
-          // Limpiar opciones anteriores manteniendo "todos"
-          repoFilter.innerHTML = '<option value="todos">Todos los repositorios</option>';
-          
-          response.repos.forEach(repo => {
-            const opt = document.createElement('option');
-            opt.value = repo;
-            opt.textContent = repo;
-            repoFilter.appendChild(opt);
+          // Calcular visitas de todos los tiempos para cada repositorio en el desplegable
+          vistasPorRepo = {};
+          reposDisponibles.forEach(r => vistasPorRepo[r] = 0);
+          rawData.forEach(row => {
+            if (vistasPorRepo.hasOwnProperty(row.repo)) {
+              vistasPorRepo[row.repo] += row.views;
+            }
           });
           
-          M.FormSelect.init(repoFilter);
+          // Por defecto, seleccionar todos
+          selectedRepos = new Set(reposDisponibles);
+          
+          renderizarListaRepositorios();
+          actualizarTriggerLabel();
+          
+          // Configurar fechas límites
+          let fechaMinima = '1970-01-01';
+          if (rawData && rawData.length > 0) {
+            fechaMinima = rawData.reduce((min, f) => f.fecha < min ? f.fecha : min, '9999-12-31');
+          }
+          
+          const startDateInput = document.getElementById('start-date-input');
+          const endDateInput = document.getElementById('end-date-input');
+          
+          if (fechaMinima && fechaMinima !== '9999-12-31') {
+            startDateInput.min = fechaMinima;
+            endDateInput.min = fechaMinima;
+          }
+          
+          const hoy = new Date().toISOString().substring(0, 10);
+          const hace30dias = new Date();
+          hace30dias.setDate(hace30dias.getDate() - 30);
+          const hace30diasStr = hace30dias.toISOString().substring(0, 10);
+          
+          startDateInput.value = hace30diasStr < fechaMinima ? fechaMinima : hace30diasStr;
+          endDateInput.value = hoy;
+          
           aplicarFiltros();
         }).obtenerDatosDashboard();
       }
 
-      function aplicarFiltros() {
-        const repoSeleccionado = document.getElementById('repo-filter').value;
-        const diasFiltro = document.getElementById('date-filter').value;
+      function renderizarListaRepositorios(filtroBusqueda = '') {
+        const listContainer = document.getElementById('repo-list-options');
+        listContainer.innerHTML = '';
         
-        // Calcular fecha límite
-        let fechaLimite = null;
-        if (diasFiltro !== 'todos') {
-          const limite = new Date();
-          limite.setDate(limite.getDate() - parseInt(diasFiltro));
-          fechaLimite = limite.toISOString().substring(0, 10);
+        const filtro = filtroBusqueda.toLowerCase();
+        const reposFiltrados = reposDisponibles.filter(repo => repo.toLowerCase().includes(filtro));
+        
+        if (reposFiltrados.length === 0) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.style.padding = '8px';
+          emptyMsg.style.color = '#94a3b8';
+          emptyMsg.style.fontSize = '13px';
+          emptyMsg.textContent = 'No se encontraron repositorios';
+          listContainer.appendChild(emptyMsg);
+          return;
+        }
+        
+        reposFiltrados.forEach(repo => {
+          const isChecked = selectedRepos.has(repo);
+          
+          const row = document.createElement('div');
+          row.className = 'repo-option-row';
+          
+          const label = document.createElement('label');
+          label.style.display = 'flex';
+          label.style.alignItems = 'center';
+          label.style.cursor = 'pointer';
+          label.style.flex = '1';
+          label.style.margin = '0';
+          
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'filled-in repo-checkbox';
+          checkbox.value = repo;
+          checkbox.checked = isChecked;
+          
+          checkbox.addEventListener('change', (e) => {
+            if (checkbox.checked) {
+              selectedRepos.add(repo);
+            } else {
+              selectedRepos.delete(repo);
+            }
+            actualizarTriggerLabel();
+            aplicarFiltros();
+          });
+          
+          const span = document.createElement('span');
+          span.className = 'repo-name-text';
+          span.style.color = '#334155';
+          span.style.fontSize = '13px';
+          span.style.paddingLeft = '30px';
+          span.style.lineHeight = '18px';
+          
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = repo;
+          
+          const totalVistas = vistasPorRepo[repo] || 0;
+          const viewsSpan = document.createElement('span');
+          viewsSpan.style.color = '#64748b';
+          viewsSpan.style.fontSize = '11px';
+          viewsSpan.style.marginLeft = '4px';
+          viewsSpan.textContent = `(${totalVistas.toLocaleString()})`;
+          
+          span.appendChild(nameSpan);
+          span.appendChild(viewsSpan);
+          
+          label.appendChild(checkbox);
+          label.appendChild(span);
+          
+          const btnSolo = document.createElement('button');
+          btnSolo.type = 'button';
+          btnSolo.className = 'btn-only-this';
+          btnSolo.style.padding = '0 8px';
+          btnSolo.style.height = '22px';
+          btnSolo.style.lineHeight = '22px';
+          btnSolo.style.fontSize = '10px';
+          btnSolo.style.textTransform = 'none';
+          btnSolo.style.borderRadius = '4px';
+          btnSolo.style.backgroundColor = '#e0e7ff';
+          btnSolo.style.color = '#4f46e5';
+          btnSolo.style.border = 'none';
+          btnSolo.style.cursor = 'pointer';
+          btnSolo.style.fontWeight = '500';
+          btnSolo.style.display = 'none';
+          btnSolo.textContent = 'Solo';
+          
+          btnSolo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            selectedRepos.clear();
+            selectedRepos.add(repo);
+            renderizarListaRepositorios(filtroBusqueda);
+            actualizarTriggerLabel();
+            aplicarFiltros();
+          });
+          
+          row.appendChild(label);
+          row.appendChild(btnSolo);
+          
+          row.addEventListener('click', (e) => {
+            if (e.target !== checkbox && e.target !== btnSolo && !label.contains(e.target)) {
+              checkbox.checked = !checkbox.checked;
+              checkbox.dispatchEvent(new Event('change'));
+            }
+          });
+          
+          listContainer.appendChild(row);
+        });
+      }
+
+      function actualizarTriggerLabel() {
+        const labelEl = document.getElementById('repo-select-label');
+        const count = selectedRepos.size;
+        const total = reposDisponibles.length;
+        
+        if (count === 0) {
+          labelEl.textContent = 'Ningún repositorio';
+        } else if (count === total) {
+          labelEl.textContent = 'Todos los repositorios';
+        } else if (count === 1) {
+          labelEl.textContent = Array.from(selectedRepos)[0];
+        } else {
+          labelEl.textContent = `${count} repositorios`;
+        }
+        
+        const btnInvert = document.getElementById('btn-select-invert');
+        if (btnInvert) {
+          btnInvert.disabled = (count === 0 || count === total);
+        }
+      }
+
+      function aplicarFiltros() {
+        const diasFiltro = document.getElementById('date-filter').value;
+        const customDateContainer = document.getElementById('custom-date-container');
+        
+        let fechaInicio = null;
+        let fechaFin = null;
+        
+        if (diasFiltro === 'custom') {
+          customDateContainer.style.display = 'flex';
+          const startDateInput = document.getElementById('start-date-input');
+          const endDateInput = document.getElementById('end-date-input');
+          
+          let valInicio = startDateInput.value;
+          let valFin = endDateInput.value;
+          
+          // Encontrar la fecha mínima registrada
+          let fechaMinima = '1970-01-01';
+          if (rawData && rawData.length > 0) {
+            fechaMinima = rawData.reduce((min, f) => f.fecha < min ? f.fecha : min, '9999-12-31');
+          }
+          
+          if (valInicio && valInicio < fechaMinima) {
+            valInicio = fechaMinima;
+            startDateInput.value = fechaMinima;
+          }
+          
+          fechaInicio = valInicio;
+          fechaFin = valFin;
+        } else {
+          customDateContainer.style.display = 'none';
+          if (diasFiltro !== 'todos') {
+            const limite = new Date();
+            limite.setDate(limite.getDate() - parseInt(diasFiltro));
+            fechaInicio = limite.toISOString().substring(0, 10);
+          }
         }
         
         // Filtrar datos
         let datosFiltrados = rawData;
-        if (repoSeleccionado !== 'todos') {
-          datosFiltrados = datosFiltrados.filter(row => row.repo === repoSeleccionado);
+        
+        // 1. Filtrar por repositorios seleccionados
+        datosFiltrados = datosFiltrados.filter(row => selectedRepos.has(row.repo));
+        
+        // 2. Filtrar por fecha de inicio
+        if (fechaInicio) {
+          datosFiltrados = datosFiltrados.filter(row => row.fecha >= fechaInicio);
         }
-        if (fechaLimite) {
-          datosFiltrados = datosFiltrados.filter(row => row.fecha >= fechaLimite);
+        
+        // 3. Filtrar por fecha de fin
+        if (fechaFin) {
+          datosFiltrados = datosFiltrados.filter(row => row.fecha <= fechaFin);
         }
         
-        // Agrupar por fecha
-        const agrupado = {};
-        let totalViews = 0;
-        let totalUniques = 0;
-        
-        datosFiltrados.forEach(row => {
-          if (!agrupado[row.fecha]) {
-            agrupado[row.fecha] = { views: 0, uniques: 0 };
-          }
-          agrupado[row.fecha].views += row.views;
-          agrupado[row.fecha].uniques += row.uniques;
-          totalViews += row.views;
-          totalUniques += row.uniques;
-        });
-        
-        // Actualizar KPIs
-        document.getElementById('stat-total-views').textContent = totalViews.toLocaleString();
-        document.getElementById('stat-unique-visitors').textContent = totalUniques.toLocaleString();
-        
-        // Preparar vectores ordenados por fecha
-        const fechasOrdenadas = Object.keys(agrupado).sort();
-        const viewsArray = fechasOrdenadas.map(f => agrupado[f].views);
-        const uniquesArray = fechasOrdenadas.map(f => agrupado[f].uniques);
-        
-        dibujarGrafico(fechasOrdenadas, viewsArray, uniquesArray);
+        // Calcular KPIs y dibujar gráfico según el tab activo
+        if (activeTab === 'evolution') {
+          const agrupado = {};
+          let totalViews = 0;
+          let totalUniques = 0;
+          
+          datosFiltrados.forEach(row => {
+            if (!agrupado[row.fecha]) {
+              agrupado[row.fecha] = { views: 0, uniques: 0 };
+            }
+            agrupado[row.fecha].views += row.views;
+            agrupado[row.fecha].uniques += row.uniques;
+            totalViews += row.views;
+            totalUniques += row.uniques;
+          });
+          
+          document.getElementById('stat-total-views').textContent = totalViews.toLocaleString();
+          document.getElementById('stat-unique-visitors').textContent = totalUniques.toLocaleString();
+          
+          const fechasOrdenadas = Object.keys(agrupado).sort();
+          const viewsArray = fechasOrdenadas.map(f => agrupado[f].views);
+          const uniquesArray = fechasOrdenadas.map(f => agrupado[f].uniques);
+          
+          dibujarGraficoLineal(fechasOrdenadas, viewsArray, uniquesArray);
+        } else {
+          const repoStats = {};
+          let totalViews = 0;
+          let totalUniques = 0;
+          
+          datosFiltrados.forEach(row => {
+            if (!repoStats[row.repo]) {
+              repoStats[row.repo] = { views: 0, uniques: 0 };
+            }
+            repoStats[row.repo].views += row.views;
+            repoStats[row.repo].uniques += row.uniques;
+            totalViews += row.views;
+            totalUniques += row.uniques;
+          });
+          
+          document.getElementById('stat-total-views').textContent = totalViews.toLocaleString();
+          document.getElementById('stat-unique-visitors').textContent = totalUniques.toLocaleString();
+          
+          const sortedRepos = Object.keys(repoStats).map(name => ({
+            name: name,
+            views: repoStats[name].views,
+            uniques: repoStats[name].uniques
+          })).sort((a, b) => b.views - a.views);
+          
+          const limitN = parseInt(document.getElementById('top-n-select').value) || 10;
+          const topRepos = sortedRepos.slice(0, limitN);
+          
+          const labels = topRepos.map(r => r.name);
+          const viewsArray = topRepos.map(r => r.views);
+          const uniquesArray = topRepos.map(r => r.uniques);
+          
+          dibujarGraficoBarras(labels, viewsArray, uniquesArray);
+        }
       }
 
-      function dibujarGrafico(labels, viewsData, uniquesData) {
+      function dibujarGraficoLineal(labels, viewsData, uniquesData) {
         document.getElementById('loader').style.display = 'none';
-        document.getElementById('chart-wrapper').style.display = 'block';
+        
+        const wrapper = document.getElementById('chart-wrapper');
+        wrapper.style.height = '350px';
+        wrapper.style.display = 'block';
         
         const ctx = document.getElementById('trafficChart').getContext('2d');
         
@@ -308,6 +759,85 @@
                 }
               },
               x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  font: {
+                    family: 'Outfit'
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      function dibujarGraficoBarras(labels, viewsData, uniquesData) {
+        document.getElementById('loader').style.display = 'none';
+        
+        const wrapper = document.getElementById('chart-wrapper');
+        const count = labels.length;
+        wrapper.style.height = `${Math.max(300, count * 35)}px`;
+        wrapper.style.display = 'block';
+        
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        
+        if (myChart) {
+          myChart.destroy();
+        }
+        
+        myChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Visualizaciones',
+                data: viewsData,
+                backgroundColor: '#4f46e5',
+                borderColor: '#4f46e5',
+                borderWidth: 1,
+                borderRadius: 4
+              },
+              {
+                label: 'Visitantes únicos',
+                data: uniquesData,
+                backgroundColor: '#10b981',
+                borderColor: '#10b981',
+                borderWidth: 1,
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  font: {
+                    family: 'Outfit',
+                    size: 13
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                grid: {
+                  color: '#f1f5f9'
+                },
+                ticks: {
+                  font: {
+                    family: 'Outfit'
+                  }
+                }
+              },
+              y: {
                 grid: {
                   display: false
                 },

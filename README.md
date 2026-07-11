@@ -59,10 +59,17 @@ El script añade de forma automática un menú para controlar todas las acciones
 </p>
 
 ### Panel de estadísticas interactivo
-Permite analizar de forma agregada o individual el volumen de visualizaciones y visitas de los repositorios seleccionados en el rango temporal deseado.
+Permite analizar de forma agregada o múltiple el volumen de visualizaciones y visitas de los repositorios seleccionados mediante una multiselección interactiva con buscador integrado, visualizaciones totales de todos los tiempos al lado del nombre de cada repositorio y botones rápidos (seleccionar todos, ninguno o invertir selección). Dispone de un selector de rango temporal flexible (15, 30, 90, 180, 360 días, histórico completo o rango personalizado indicando manualmente las fechas de inicio y fin, limitando la inicial a la medición más antigua registrada). Incorpora pestañas para alternar entre la evolución temporal (gráfico de líneas) y un ranking de popularidad interactivo (gráfico de barras horizontales autoadaptable en altura de los top 5, 10 o 15 repositorios más visitados).
 
 <p align="center">
-  <img src="assets/modal-estadisticas.png" alt="Estadísticas de tráfico" width="85%">
+  <img src="assets/modal-estadisticas.gif" alt="Estadísticas de tráfico" width="100%">
+</p>
+
+### Planificación del activador por tiempo
+Diálogo interactivo para programar la recolección automática y periódica del tráfico (por horas, por días o seleccionando días de la semana y horas específicas) para evitar la pérdida del histórico de 14 días.
+
+<p align="center">
+  <img src="assets/dialogo-activador.png" alt="Planificación del activador" width="55%">
 </p>
 
 ### Hoja de datos de repositorios
