@@ -76,7 +76,7 @@ Diálogo interactivo para programar la recolección automática y periódica del
 Contiene la lista sincronizada de repositorios junto con metadatos útiles como descripción, lenguaje principal, fecha de creación y fecha del último push.
 
 <p align="center">
-  <img src="assets/tabla-repos.png" alt="Tabla de repositorios" width="85%">
+  <img src="assets/tabla-repos.png" alt="Tabla de repositorios" width="100%">
 </p>
 
 ### Histórico acumulado de tráfico
@@ -90,7 +90,7 @@ Los datos se guardan secuencialmente y sin interrupciones en la pestaña de trá
 Acceso rápido y visual para configurar el inicio seguro y copiar los enlaces necesarios para registrar la aplicación.
 
 <p align="center">
-  <img src="assets/diálogo-credenciales.png" alt="Configurar credenciales" width="55%">
+  <img src="assets/diálogo-credenciales.png" alt="Configurar credenciales" width="75%">
 </p>
 
 ### Diálogo Cerrar sesión
