@@ -45,8 +45,8 @@ function abrirActivadorUI() {
 function abrirAcercaDe() {
   const template = HtmlService.createTemplateFromFile('acercaDe');
   const html = template.evaluate()
-      .setWidth(450)
-      .setHeight(480)
+      .setWidth(500)
+      .setHeight(530)
       .setTitle('Acerca de...');
   SpreadsheetApp.getUi().showModalDialog(html, 'Acerca de...');
 }
