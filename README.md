@@ -20,6 +20,7 @@ Una herramienta moderna desarrollada en **Google Apps Script** para el análisis
   <a href="#vista-de-la-aplicación">Vista de la aplicación</a> •
   <a href="#instalación-y-configuración">Instalación</a> •
   <a href="#instrucciones-de-uso">Instrucciones de uso</a> •
+  <a href="#novedades-en-la-versión-22">Novedades v2.2</a> •
   <a href="#créditos">Créditos</a> •
   <a href="#licencia">Licencia</a>
 </p>
@@ -29,7 +30,7 @@ Una herramienta moderna desarrollada en **Google Apps Script** para el análisis
 - 📈 **Estadísticas de tráfico ricas e interactivas**: Gráficos dinámicos e interactivos de visitas y visitantes únicos a través de **Chart.js**. Permite filtrar individualmente por repositorio o de forma agregada, con rangos temporales flexibles (15, 30, 90, 180, 360 días o histórico completo).
 - ⏰ **Planificación granular de activadores**: Configura ejecuciones automáticas de recuperación de tráfico recurrentes directamente desde la hoja de cálculo (por horas, por días, o seleccionando días de la semana y horas específicas).
 - 🔑 **Configuración segura de credenciales**: Panel visual para introducir el `Client ID` y `Client Secret` guardándolos de forma segura en las propiedades internas del script, sin exponerlos en el código fuente.
-- 📥 **Sincronización directa**: Obtiene detalles de tus repositorios públicos/privados y descarga de visitas empleando la API oficial de GitHub.
+- 📥 **Sincronización integrada e inteligente**: Sincroniza automáticamente el catálogo de repositorios y sus metadatos antes de recolectar el tráfico (tanto manual como en activadores programados), gestionando incidencias de repositorios renombrados o eliminados.
 - 🚪 **Autenticación segura**: Integra el flujo OAuth2 de forma nativa para autorizar los permisos de lectura de la API de GitHub sobre tus repositorios.
 - ℹ️ **Panel Acerca de**: Información del desarrollador, enlaces al código fuente original y soporte directo.
 
@@ -153,11 +154,19 @@ Modal de créditos interactivo e integrado.
 Una vez instalado y autenticado, podrás utilizar las herramientas del menú contextual `GitHub Stats`:
 
 1. **📈 Ver estadísticas de tráfico**: Abre el panel visual e interactivo para consultar las visitas totales y visitantes únicos.
-2. **📥 Leer info repositorios**: Fuerza la actualización alfabética y metadatos de tus repositorios en la pestaña `Repositorio`.
-3. **🔄 Recuperar tráfico**: Ejecuta de forma manual la descarga del tráfico de visitas reciente.
-4. **⏰ Configurar activador**: Establece la frecuencia automática con la que Google Apps Script recopilará los datos de tráfico (evitando perder la ventana de 15 días de la API de GitHub).
+2. **📥 Leer info repositorios**: Permite forzar de forma manual la actualización alfabética y metadatos de tus repositorios en la pestaña `Repositorios`.
+3. **🔄 Recuperar tráfico**: Sincroniza automáticamente la lista de repositorios y descarga el tráfico de visitas reciente.
+4. **⏰ Configurar activador**: Establece la frecuencia automática con la que Google Apps Script sincronizará los repositorios y recopilará los datos de tráfico (evitando perder la ventana de 14 días de la API de GitHub).
 5. **🔑 Configurar credenciales**: Actualiza el Client ID y Client Secret de la aplicación autorizada.
 6. **🚪 Cerrar sesión**: Desconecta la sesión actual de GitHub y limpia los tokens temporales de acceso de la hoja de cálculo de manera segura.
+
+---
+
+## Novedades en la versión 2.2
+
+- 🔄 **Sincronización previa automática**: La recolección de tráfico (tanto manual como programada mediante el activador) actualiza previamente el catálogo de repositorios, garantizando que repositorios recién creados se incluyan sin intervención manual.
+- 🛡️ **Robustez y tolerancia a fallos**: Detección y omisión limpia de repositorios eliminados o inaccesibles (HTTP 404), así como validación de respuestas de red en la paginación.
+- 🎨 **Coherencia visual en el Dashboard**: Las tarjetas de resumen (*Total de visualizaciones* y *Visitantes únicos*) ahora utilizan exactamente la misma paleta de color que sus correspondientes series en la gráfica (índigo `#4f46e5` y verde esmeralda `#10b981`).
 
 ---
 

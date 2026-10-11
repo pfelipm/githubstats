@@ -1,4 +1,4 @@
-const VERSION = '2.1';
+const VERSION = '2.2';
 
 // add custom menu
 function onOpen() {
@@ -189,15 +189,14 @@ function ultimaFechaTrafico(repositorio) {
 }
 
 function recuperarTrafico() {
-  
-  // Corregir: si se ha borrado un respositorio pero no se ha actualizado la lista en la hoja 1 se producirá un error (no fatal)
-  // Controlar este error (json = 'Not found') o actualizar siempre lista de repositorios antes de actualizarlos
- 
   const service = getGithubService();
 
   if (service.hasAccess()) {
-     
-    Logger.log("App has access.");   
+    Logger.log("App has access.");
+
+    // 1. Sincronizar previamente la lista de repositorios y sus metadatos
+    Logger.log("Sincronizando lista de repositorios antes de recuperar tráfico...");
+    getUserRepos();
     
     // Obtener el nombre de usuario autenticado de la API de GitHub
     let username = "";
@@ -284,6 +283,18 @@ function recuperarTrafico() {
       };
      
       const response = UrlFetchApp.fetch(api, options);
+      const statusCode = response.getResponseCode();
+
+      if (statusCode === 404) {
+        Logger.log(repo + ': Repositorio no encontrado (404 Not Found). Omitiendo.');
+        return;
+      }
+
+      if (statusCode !== 200) {
+        Logger.log(repo + ': Error al consultar tráfico (HTTP ' + statusCode + '). Respuesta: ' + response.getContentText());
+        return;
+      }
+
       const json = JSON.parse(response.getContentText());
     
       Logger.log (repo + ': ');
@@ -368,7 +379,19 @@ function getUserRepos() {
      // Bucle para recorrer todas las páginas de resultados
      do {
        const response = UrlFetchApp.fetch(api, options);
+       const statusCode = response.getResponseCode();
+
+       if (statusCode !== 200) {
+         Logger.log("Error al consultar repositorios de GitHub (HTTP " + statusCode + "): " + response.getContentText());
+         break;
+       }
+
        const jsonResponse = JSON.parse(response.getContentText());
+       if (!Array.isArray(jsonResponse)) {
+         Logger.log("Formato inesperado devuelto por la API de GitHub: " + response.getContentText());
+         break;
+       }
+
        allRepos = allRepos.concat(jsonResponse); // Se añaden los repositorios de la página actual a la lista total
        
        // Se busca la URL de la siguiente página en la cabecera 'Link'
